@@ -18,7 +18,7 @@ public class DummyController {
 
     private void placeOrderInSAP() {
         try {
-            Thread.sleep(5 * 1000);   //DB request, HTTP reuest an SAP , ...
+            Thread.sleep(5 * 1000);   // DB request, HTTP request an SAP , ...
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -30,6 +30,7 @@ public class CartController {
         }
     }
 
+    // not synchronized -> incorrect result in DB
     public String addToCart1(@RequestBody final AddToCart addToCart) {
         final var cart = cartRepository.findById(addToCart.cartId());
         final var newProductCodes = cart.productCode() + ", " + addToCart.productCode();
@@ -37,6 +38,7 @@ public class CartController {
         return "affected rows: " + affectedRows;
     }
 
+    // synchronized -> correct result in DB, but serial processing of requests
     public String addToCart2(@RequestBody final AddToCart addToCart) {
         synchronized (this) {
             final var cart = cartRepository.findById(addToCart.cartId());
@@ -46,6 +48,7 @@ public class CartController {
         }
     }
 
+    // synchronized, but lock object is not globally the same (new object for every request / thread) -> can't work, does not work
     public String addToCart3(@RequestBody final AddToCart addToCart) {
         final var cart = cartRepository.findById(addToCart.cartId());
 
@@ -55,4 +58,5 @@ public class CartController {
             return "affected rows: " + affectedRows;
         }
     }
+
 }

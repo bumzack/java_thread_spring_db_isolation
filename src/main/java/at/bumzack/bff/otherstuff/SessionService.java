@@ -2,7 +2,6 @@ package at.bumzack.bff.otherstuff;
 
 import at.bumzack.bff.cart.Cart;
 import at.bumzack.bff.cart.CartRepository;
-import at.bumzack.bff.filter.SessionFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,8 @@ public class SessionService {
     }
 
     public void addToSession(final int cartId) {
+        // that's not how "Sessions" in production work, this is just an example for the "double read" pattern in synchronized blocks
+        // thats the double read ...
         if (!carts.containsKey(cartId)) {
             LOG.info("1  add cart to session for cart-id {}", cartId);
             synchronized (carts) {

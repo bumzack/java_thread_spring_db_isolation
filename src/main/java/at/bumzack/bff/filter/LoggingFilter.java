@@ -24,9 +24,9 @@ public class LoggingFilter extends OncePerRequestFilter {
         // code am weg zum controller
         // request analysieren
 
-        final String requestURI = request.getRequestURI(); // "/dummy"
-        final String method = request.getMethod();
-        final String feReqId = request.getHeader("fe-req-id");
+        final var requestURI = request.getRequestURI(); // "/dummy"
+        final var method = request.getMethod();
+        final var feReqId = request.getHeader("fe-req-id");
         final var stopWatch = new StopWatch();
         final var threadId = Thread.currentThread().threadId();
         stopWatch.start();

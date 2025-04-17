@@ -28,6 +28,8 @@ public class SessionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest request,
                                     final HttpServletResponse response,
                                     final FilterChain filterChain) throws ServletException, IOException {
+
+        // that's not how "Sessions" in production work, this is just an example for the "double read" pattern in synchronized blocks
         final var cartId = request.getHeader("cart-id");
 
         if (nonNull(cartId)) {

@@ -21,21 +21,17 @@ public class CartRepository {
 
         final var keyHolder = new GeneratedKeyHolder();
 
-        final var affectedRows = jdbcTemplate.update(connection -> {
+        return jdbcTemplate.update(connection -> {
             final var ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, productCodes);
             ps.setInt(2, cartId);
             return ps;
         }, keyHolder);
-
-        return affectedRows;
     }
 
     public Cart findById(final int cartId) {
         final String query = "SELECT * FROM  cart  WHERE id = " + cartId;
-
         final var res = jdbcTemplate.query(query, mapCart());
-
         return res.stream().findFirst().orElse(null);
     }
 
