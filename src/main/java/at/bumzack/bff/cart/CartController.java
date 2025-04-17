@@ -1,58 +1,40 @@
 package at.bumzack.bff.cart;
 
-import at.bumzack.bff.otherstuff.SessionService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static java.util.Objects.nonNull;
+
 @RestController
 public class CartController {
+    private final Logger LOG = LogManager.getLogger(CartController.class);
 
     private final CartRepository cartRepository;
-    private final SessionService sessionService;
 
-    public CartController(final CartRepository cartRepository, final SessionService sessionService) {
+    public CartController(final CartRepository cartRepository) {
         this.cartRepository = cartRepository;
-        this.sessionService = sessionService;
     }
 
     @PutMapping(value = "/api/carts", consumes = MediaType.APPLICATION_JSON_VALUE)
     public String addToCart(@RequestBody final AddToCart addToCart) {
-
-        final var cart = sessionService.getSessionCart(addToCart.cartId());
-
-        synchronized (cart) {
-            final var currentCart = cartRepository.findById(addToCart.cartId());
-            final var newProductCodes = currentCart.productCode() + ", " + addToCart.productCode();
-            final var affectedRows = cartRepository.addToCart(addToCart.cartId(), newProductCodes);
-            return "affected rows: " + affectedRows;
+        final var currentCart = cartRepository.findByIdAndVersion(addToCart.cartId(), addToCart.cartVersion());
+        if (nonNull(currentCart)) {
+            try {
+                // 13:52:00.343   4 requests
+                final var newProductCodes = currentCart.productCode() + ", " + addToCart.productCode();
+                final var affectedRows = cartRepository.addToCart(addToCart.cartId(), addToCart.cartVersion(), newProductCodes);
+                LOG.info("Successfully added " + addToCart.productCode() + " to the cart");
+                return "Successfully added " + addToCart.productCode() + " to the cart";
+            } catch (final Exception e) {
+                LOG.error("cart update did not affect any rows -  version {}. ", addToCart.cartVersion());
+                return "cart update did not affect any rows ";
+            }
         }
-    }
-
-    public String addToCart1(@RequestBody final AddToCart addToCart) {
-        final var cart = cartRepository.findById(addToCart.cartId());
-        final var newProductCodes = cart.productCode() + ", " + addToCart.productCode();
-        final var affectedRows = cartRepository.addToCart(addToCart.cartId(), newProductCodes);
-        return "affected rows: " + affectedRows;
-    }
-
-    public String addToCart2(@RequestBody final AddToCart addToCart) {
-        synchronized (this) {
-            final var cart = cartRepository.findById(addToCart.cartId());
-            final var newProductCodes = cart.productCode() + ", " + addToCart.productCode();
-            final var affectedRows = cartRepository.addToCart(addToCart.cartId(), newProductCodes);
-            return "affected rows: " + affectedRows;
-        }
-    }
-
-    public String addToCart3(@RequestBody final AddToCart addToCart) {
-        final var cart = cartRepository.findById(addToCart.cartId());
-
-        synchronized (cart) {
-            final var newProductCodes = cart.productCode() + ", " + addToCart.productCode();
-            final var affectedRows = cartRepository.addToCart(addToCart.cartId(), newProductCodes);
-            return "affected rows: " + affectedRows;
-        }
+        LOG.error("cart with version {} not found. ", addToCart.cartVersion());
+        return "cart with version " + addToCart.cartVersion() + " not found.";
     }
 }

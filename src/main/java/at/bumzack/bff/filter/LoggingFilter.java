@@ -21,25 +21,19 @@ public class LoggingFilter extends OncePerRequestFilter {
                                     final HttpServletResponse response,
                                     final FilterChain filterChain) throws ServletException, IOException {
 
-        // code am weg zum controller
-        // request analysieren
-
-        final String requestURI = request.getRequestURI(); // "/dummy"
-        final String method = request.getMethod();
-        final String feReqId = request.getHeader("fe-req-id");
+        final var requestURI = request.getRequestURI();
+        final var method = request.getMethod();
+        final var feReqId = request.getHeader("fe-req-id");
         final var stopWatch = new StopWatch();
         final var threadId = Thread.currentThread().threadId();
         stopWatch.start();
 
-        LOG.info("start {}:{}, feReqId={}, threadId {}", method, requestURI, feReqId, threadId);
+        LOG.info("start {}:{}, feReqId: {}, threadId {}", method, requestURI, feReqId, threadId);
 
         filterChain.doFilter(request, response);
-
-        // code am weg vom filter zurück : response manipulieren?
 
         stopWatch.stop();
         final var duration = stopWatch.getTotalTimeMillis();
         LOG.info("end {}:{}, feReqId={}, threadId {} took {}ms", requestURI, method, feReqId, threadId, duration);
-
     }
 }
